@@ -1,5 +1,5 @@
 import { Notification } from "@/lib/types";
-import { formatTimestamp, notificationSeverityColors } from "@/lib/utils";
+import { formatTimestamp } from "@/lib/utils";
 import { AlertTriangle, Info, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -10,10 +10,16 @@ const icons = {
   critical: AlertCircle,
 };
 
-const darkColorClasses = {
-  info: "text-blue-400 bg-blue-950/50 border-blue-800",
-  warning: "text-amber-400 bg-amber-950/50 border-amber-800",
-  critical: "text-red-400 bg-red-950/50 border-red-800",
+const sevColor = {
+  info: "text-blue-500",
+  warning: "text-amber-500",
+  critical: "text-red-500",
+};
+
+const sevBg = {
+  info: "bg-blue-50 dark:bg-blue-950/40",
+  warning: "bg-amber-50 dark:bg-amber-950/40",
+  critical: "bg-red-50 dark:bg-red-950/40",
 };
 
 interface RecentAlertsProps {
@@ -24,55 +30,55 @@ export default function RecentAlerts({ notifications }: RecentAlertsProps) {
   const recent = notifications.slice(0, 5);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm h-full">
-      <div className="px-5 pt-5 pb-3 flex items-center justify-between">
-        <h2 className="font-semibold text-slate-800 dark:text-slate-100">Последние уведомления</h2>
+    <div className="card overflow-hidden">
+      <div className="px-4 py-3.5 flex items-center justify-between border-b border-[var(--card-border)]">
+        <h2 className="text-[13px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+          Последние события
+        </h2>
         <Link
           href="/notifications"
-          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium shrink-0"
+          className="text-xs text-[var(--accent)] hover:underline font-medium"
         >
           Все →
         </Link>
       </div>
 
-      <div className="divide-y divide-slate-50 dark:divide-slate-800">
+      <div className="divide-y divide-[var(--card-border)]">
         {recent.length === 0 ? (
-          <div className="px-5 pb-8 text-sm text-slate-400 dark:text-slate-500 text-center pt-8">
-            Уведомлений нет
+          <div className="px-4 py-10 text-sm text-[var(--text-tertiary)] text-center">
+            Нет событий
           </div>
         ) : (
           recent.map((n) => {
             const Icon = icons[n.severity];
-            const lightClass = notificationSeverityColors[n.severity];
-            const darkClass = darkColorClasses[n.severity];
 
             return (
               <div
                 key={n.id}
                 className={cn(
-                  "px-5 py-3 flex items-start gap-3",
-                  !n.read && "bg-blue-50/40 dark:bg-blue-950/20"
+                  "px-4 py-3 flex items-start gap-3 transition-colors",
+                  !n.read && "bg-[var(--accent-soft)]/50"
                 )}
               >
-                <div className={cn("p-1.5 rounded-lg border mt-0.5 shrink-0", lightClass, `dark:${darkClass}`)}>
-                  <Icon className="w-3.5 h-3.5" />
+                <div className={cn("p-1.5 rounded-lg shrink-0 mt-0.5", sevBg[n.severity])}>
+                  <Icon className={cn("w-3.5 h-3.5", sevColor[n.severity])} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
+                    <p className="text-[13px] font-medium text-[var(--text-primary)] truncate">
                       {n.title}
                     </p>
                     {!n.read && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0" />
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                  <p className="text-xs text-[var(--text-tertiary)] mt-0.5 line-clamp-1">
                     {n.message}
                   </p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                    {formatTimestamp(n.timestamp)}
-                  </p>
                 </div>
+                <span className="text-[11px] text-[var(--text-faint)] shrink-0 mt-1">
+                  {formatTimestamp(n.timestamp)}
+                </span>
               </div>
             );
           })

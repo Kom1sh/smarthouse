@@ -7,132 +7,73 @@ import {
   WifiOff,
   TriangleAlert,
   Bell,
-  Wifi,
+  Plus,
 } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
-import SensorMiniCard from "@/components/dashboard/SensorMiniCard";
+import HomeStatusBanner from "@/components/dashboard/HomeStatusBanner";
+import RoomOverview from "@/components/dashboard/RoomOverview";
 import RecentAlerts from "@/components/dashboard/RecentAlerts";
-import TempHumidChart from "@/components/dashboard/TempHumidChart";
-import { getDashboardStats, getAllSensors, getNotifications, getSensorHistory } from "@/lib/api";
-import { DashboardStats, Sensor, Notification } from "@/lib/types";
+import ChartManager from "@/components/dashboard/ChartManager";
+import AddSensorModal from "@/components/sensors/AddSensorModal";
+import { useSensors, useNotifications } from "@/lib/hooks";
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [sensors, setSensors] = useState<Sensor[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [tempHistory, setTempHistory] = useState<{ timestamp: string; value: number }[]>([]);
-  const [humidHistory, setHumidHistory] = useState<{ timestamp: string; value: number }[]>([]);
-  const [loading, setLoading] = useState(true);
+  const sensors = useSensors();
+  const notifications = useNotifications();
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      const [s, sns, notifs, temp, humid] = await Promise.all([
-        getDashboardStats(),
-        getAllSensors(),
-        getNotifications(),
-        getSensorHistory("s1"),
-        getSensorHistory("s2"),
-      ]);
-      setStats(s);
-      setSensors(sns);
-      setNotifications(notifs);
-      setTempHistory(temp);
-      setHumidHistory(humid);
-      setLoading(false);
-    }
-    load();
+    setMounted(true);
   }, []);
 
-  const warningSensors = sensors.filter((s) => s.status === "warning" || s.status === "critical");
-  const prioritySensors = [
-    ...warningSensors,
-    ...sensors.filter((s) => s.status === "offline"),
-    ...sensors.filter((s) => s.status === "online"),
-  ].slice(0, 8);
+  const totalSensors = sensors.length;
+  const onlineSensors = sensors.filter((s) => s.status === "online").length;
+  const offlineSensors = sensors.filter((s) => s.status === "offline").length;
+  const warningSensors = sensors.filter(
+    (s) => s.status === "warning" || s.status === "critical"
+  ).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  if (loading) {
+  if (!mounted) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">Загрузка данных...</p>
-        </div>
+        <div className="w-7 h-7 border-2 border-[var(--card-border)] border-t-[var(--accent)] rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard
-          label="Датчиков"
-          value={stats?.totalSensors ?? 0}
-          icon={Cpu}
-          color="blue"
-          trend="всего в системе"
-        />
-        <StatCard
-          label="Онлайн"
-          value={stats?.onlineSensors ?? 0}
-          icon={CheckCircle}
-          color="emerald"
-          trend="работают"
-        />
-        <StatCard
-          label="Офлайн"
-          value={stats?.offlineSensors ?? 0}
-          icon={WifiOff}
-          color="slate"
-          trend="не отвечают"
-        />
-        <StatCard
-          label="Внимание"
-          value={stats?.warningSensors ?? 0}
-          icon={TriangleAlert}
-          color="amber"
-          trend="требуют проверки"
-        />
-        <StatCard
-          label="Уведомлений"
-          value={stats?.unreadNotifications ?? 0}
-          icon={Bell}
-          color="red"
-          trend="непрочитанных"
-        />
-        <StatCard
-          label="ESP онлайн"
-          value={`${stats?.espOnline}/${stats?.espDevices}`}
-          icon={Wifi}
-          color="cyan"
-          trend="устройств"
-        />
+      <HomeStatusBanner sensors={sensors} notifications={notifications} />
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <StatCard label="Датчиков" value={totalSensors} icon={Cpu} color="blue" trend="в системе" />
+        <StatCard label="Онлайн" value={onlineSensors} icon={CheckCircle} color="emerald" trend="работают" />
+        <StatCard label="Офлайн" value={offlineSensors} icon={WifiOff} color="slate" trend="не отвечают" />
+        <StatCard label="Внимание" value={warningSensors} icon={TriangleAlert} color="amber" trend="нужна проверка" />
+        <StatCard label="Уведомления" value={unreadCount} icon={Bell} color="red" trend="непрочитанных" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        <div className="xl:col-span-2">
-          <TempHumidChart tempData={tempHistory} humidData={humidHistory} />
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2 space-y-6">
+          <ChartManager />
+          <RoomOverview sensors={sensors} />
         </div>
-        <div>
+        <div className="space-y-4">
           <RecentAlerts notifications={notifications} />
+
+          <button
+            onClick={() => setAddModalOpen(true)}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-[var(--card-border)] text-[var(--text-tertiary)] hover:border-[var(--accent-muted)] hover:text-[var(--accent)] transition-all text-[13px] font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Добавить датчик
+          </button>
         </div>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-slate-800 dark:text-slate-100">Приоритетные датчики</h2>
-          <a
-            href="/sensors"
-            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-          >
-            Все датчики →
-          </a>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {prioritySensors.map((sensor) => (
-            <SensorMiniCard key={sensor.id} sensor={sensor} />
-          ))}
-        </div>
-      </div>
+      <AddSensorModal open={addModalOpen} onClose={() => setAddModalOpen(false)} />
     </div>
   );
 }

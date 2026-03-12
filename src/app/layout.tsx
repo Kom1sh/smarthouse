@@ -10,13 +10,13 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 export const metadata: Metadata = {
   title: "SmartHome — Умный дом",
   description: "Панель управления умным домом с мониторингом датчиков ESP",
-  icons: { icon: "/favicon.ico" },
+  icons: { icon: "/icon.svg" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" className={`${geist.variable} ${geistMono.variable}`} suppressHydrationWarning>
-      <body className="antialiased bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+      <body className="antialiased font-sans">
         <ThemeProvider>
           <AppShell>{children}</AppShell>
         </ThemeProvider>

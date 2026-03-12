@@ -1,10 +1,49 @@
 @import "tailwindcss";
 
-/* Enable class-based dark mode for Tailwind v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --font-geist: "Geist", system-ui, sans-serif;
+
+  --surface: #f4f5f7;
+  --card: #ffffff;
+  --card-hover: #fafbfc;
+  --card-border: #e4e7eb;
+  --card-border-hover: #d0d5dd;
+
+  --accent: #4f6ef7;
+  --accent-soft: #eef1fe;
+  --accent-muted: #a4b4fb;
+
+  --text-primary: #1a1d23;
+  --text-secondary: #4b5162;
+  --text-tertiary: #8b92a5;
+  --text-faint: #b4baca;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 3px rgb(0 0 0 / 0.03);
+  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 4px 16px rgb(0 0 0 / 0.08), 0 2px 6px rgb(0 0 0 / 0.04);
+}
+
+.dark {
+  --surface: #0f1114;
+  --card: #181b20;
+  --card-hover: #1e2228;
+  --card-border: #282d35;
+  --card-border-hover: #363c47;
+
+  --accent: #6b8aff;
+  --accent-soft: #1a2240;
+  --accent-muted: #3d5099;
+
+  --text-primary: #e8eaef;
+  --text-secondary: #9ca3b4;
+  --text-tertiary: #636b7e;
+  --text-faint: #3e4555;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.2);
+  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.25);
+  --shadow-lg: 0 4px 16px rgb(0 0 0 / 0.3);
 }
 
 * {
@@ -15,9 +54,10 @@ body {
   font-family: var(--font-geist), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--surface);
+  color: var(--text-primary);
 }
 
-/* Light scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -26,32 +66,28 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
+  background: var(--card-border);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+  background: var(--card-border-hover);
 }
 * {
   scrollbar-width: thin;
-  scrollbar-color: #e2e8f0 transparent;
+  scrollbar-color: var(--card-border) transparent;
 }
 
-/* Dark scrollbar */
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s, border-color 0.15s;
 }
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+.card:hover {
+  border-color: var(--card-border-hover);
 }
-.dark * {
-  scrollbar-color: #334155 transparent;
-}
-
-@keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-.animate-pulse-slow {
-  animation: pulse-slow 3s ease-in-out infinite;
+.card-interactive:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--card-border-hover);
 }
