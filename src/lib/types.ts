@@ -111,3 +111,27 @@ export interface DashboardStats {
   espDevices: number;
   espOnline: number;
 }
+
+
+export type HttpPollingStatus =
+  | "idle"
+  | "connecting"
+  | "connected"
+  | "polling"
+  | "offline"
+  | "error";
+
+export interface HttpPollingStateSnapshot {
+  status: HttpPollingStatus;
+  baseUrl: string;
+  sensorsEndpoint: string;
+  sensorsUrl: string;
+  pollIntervalMs: number;
+  lastFetchAt: string | null;
+  lastSuccessAt: string | null;
+  lastError: string | null;
+  usingLiveData: boolean;
+}
+
+export type MqttConnectionStatus = HttpPollingStatus;
+export type MqttStateSnapshot = HttpPollingStateSnapshot;

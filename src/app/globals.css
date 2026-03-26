@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --font-geist: "Geist", system-ui, sans-serif;
+  --font-geist: Arial, system-ui, sans-serif;
 
   --surface: #f4f5f7;
   --card: #ffffff;

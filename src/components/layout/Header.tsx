@@ -1,21 +1,34 @@
 "use client";
 
-import { Menu, Bell, Sun, Moon } from "lucide-react";
+import { Menu, Bell, Sun, Moon, Radio } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "@/lib/theme";
+import { HttpPollingStatus } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onMenuClick: () => void;
   title: string;
   subtitle?: string;
   unreadCount: number;
+  connectionStatus: HttpPollingStatus;
 }
+
+const connectionLabel: Record<HttpPollingStatus, string> = {
+  idle: "ESP32 idle",
+  connecting: "ESP32 connect",
+  connected: "ESP32 online",
+  polling: "ESP32 polling",
+  offline: "ESP32 offline",
+  error: "ESP32 error",
+};
 
 export default function Header({
   onMenuClick,
   title,
   subtitle,
   unreadCount,
+  connectionStatus,
 }: HeaderProps) {
   const { isDark, toggleTheme } = useTheme();
 
@@ -45,21 +58,35 @@ export default function Header({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
+          <div
+            className={cn(
+              "hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium mr-1",
+              connectionStatus === "connected"
+                ? "text-emerald-600 bg-emerald-50 border-emerald-200"
+                : connectionStatus === "connecting" || connectionStatus === "polling"
+                ? "text-amber-600 bg-amber-50 border-amber-200"
+                : "text-red-600 bg-red-50 border-red-200"
+            )}
+          >
+            <Radio className="w-3.5 h-3.5" />
+            {connectionLabel[connectionStatus]}
+          </div>
+
           <button
             onClick={toggleTheme}
             className="p-2 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-hover)] transition-colors"
-            aria-label="Переключить тему"
+            title={isDark ? "Светлая тема" : "Тёмная тема"}
           >
-            {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
           <Link
             href="/notifications"
             className="relative p-2 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--card-hover)] transition-colors"
           >
-            <Bell className="w-[18px] h-[18px]" />
+            <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 ring-2 ring-[var(--card)]" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
             )}
           </Link>
         </div>

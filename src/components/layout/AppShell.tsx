@@ -4,7 +4,8 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { useUnreadCount } from "@/lib/hooks";
+import MqttBootstrap from "./MqttBootstrap";
+import { useUnreadCount, useHttpPollingState } from "@/lib/hooks";
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
   "/": { title: "Дашборд", subtitle: "Обзор системы умного дома" },
@@ -17,12 +18,14 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const unreadCount = useUnreadCount();
+  const pollingState = useHttpPollingState();
   const pathname = usePathname();
 
   const pageInfo = pageTitles[pathname] ?? { title: "SmartHome", subtitle: "" };
 
   return (
     <div className="flex h-screen overflow-hidden">
+      <MqttBootstrap />
       <Sidebar
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -34,11 +37,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           title={pageInfo.title}
           subtitle={pageInfo.subtitle}
           unreadCount={unreadCount}
+          connectionStatus={pollingState.status}
         />
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-[1200px] mx-auto p-4 sm:p-6">
-            {children}
-          </div>
+          <div className="max-w-[1200px] mx-auto p-4 sm:p-6">{children}</div>
         </main>
       </div>
     </div>

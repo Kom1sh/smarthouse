@@ -14,12 +14,14 @@ import HomeStatusBanner from "@/components/dashboard/HomeStatusBanner";
 import RoomOverview from "@/components/dashboard/RoomOverview";
 import RecentAlerts from "@/components/dashboard/RecentAlerts";
 import ChartManager from "@/components/dashboard/ChartManager";
+import MqttControlPanel from "@/components/dashboard/MqttControlPanel";
 import AddSensorModal from "@/components/sensors/AddSensorModal";
-import { useSensors, useNotifications } from "@/lib/hooks";
+import { useSensors, useNotifications, useHttpPollingState } from "@/lib/hooks";
 
 export default function DashboardPage() {
   const sensors = useSensors();
   const notifications = useNotifications();
+  const pollingState = useHttpPollingState();
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -45,15 +47,17 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <HomeStatusBanner sensors={sensors} notifications={notifications} />
+      <HomeStatusBanner sensors={sensors} notifications={notifications} pollingState={pollingState} />
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <StatCard label="Датчиков" value={totalSensors} icon={Cpu} color="blue" trend="в системе" />
-        <StatCard label="Онлайн" value={onlineSensors} icon={CheckCircle} color="emerald" trend="работают" />
-        <StatCard label="Офлайн" value={offlineSensors} icon={WifiOff} color="slate" trend="не отвечают" />
-        <StatCard label="Внимание" value={warningSensors} icon={TriangleAlert} color="amber" trend="нужна проверка" />
+        <StatCard label="Онлайн" value={onlineSensors} icon={CheckCircle} color="emerald" trend="передают данные" />
+        <StatCard label="Офлайн" value={offlineSensors} icon={WifiOff} color="slate" trend="нет свежего JSON" />
+        <StatCard label="Внимание" value={warningSensors} icon={TriangleAlert} color="amber" trend="вышли за пороги" />
         <StatCard label="Уведомления" value={unreadCount} icon={Bell} color="red" trend="непрочитанных" />
       </div>
+
+      <MqttControlPanel />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">

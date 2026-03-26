@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SmartHome Frontend
 
-## Getting Started
+Фронтенд теперь работает в режиме прямого HTTP polling к ESP32.
 
-First, run the development server:
+## Настройка
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+1. Скопируй `.env.example` в `.env.local`
+2. Укажи адрес своей ESP32:
+
+```env
+NEXT_PUBLIC_ESP32_BASE_URL=http://192.168.0.50
+NEXT_PUBLIC_ESP32_SENSORS_PATH=/sensors
+NEXT_PUBLIC_ESP32_POLL_INTERVAL_MS=3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Установи зависимости и запусти проект:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Формат JSON от ESP32
 
-## Learn More
+Ожидается ответ `GET /sensors` примерно такого вида:
 
-To learn more about Next.js, take a look at the following resources:
+```json
+{
+  "gas": 2450,
+  "water": 0,
+  "vibro": 1,
+  "light": 0,
+  "temp": 24.5,
+  "hum": 56.0
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Важно
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Чтобы браузер мог читать JSON напрямую с ESP32, устройство должно отдавать CORS-заголовок:
 
-## Deploy on Vercel
+```http
+Access-Control-Allow-Origin: *
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Если фронт открыт по `https`, запросы на `http://<esp32-ip>` браузер может заблокировать как mixed content.
